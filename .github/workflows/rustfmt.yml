@@ -1,6 +1,6 @@
-name: Rustfmt
+# name: Rustfmt
 
-on: [push, pull_request]
+# on: [push, pull_request]
 
 # jobs:
 #   build:
