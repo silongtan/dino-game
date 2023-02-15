@@ -1,10 +1,6 @@
 use bevy::app::App;
 use bevy::prelude::*;
 
-fn hello_world() {
-    println!("hello world!");
-}
-
 fn setup_camera(mut commands: Commands) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 }
@@ -30,10 +26,31 @@ fn spawn_snake(mut commands: Commands) {
         .insert(SnakeHead);
 }
 
+fn snake_movement(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut head_positions: Query<&mut Transform, With<SnakeHead>>,
+) {
+    for mut transform in head_positions.iter_mut() {
+        if keyboard_input.pressed(KeyCode::Left) {
+            transform.translation.x -= 2.;
+        }
+        if keyboard_input.pressed(KeyCode::Right) {
+            transform.translation.x += 2.;
+        }
+        if keyboard_input.pressed(KeyCode::Down) {
+            transform.translation.y -= 2.;
+        }
+        if keyboard_input.pressed(KeyCode::Up) {
+            transform.translation.y += 2.;
+        }
+    }
+}
+
 fn main() {
     App::new()
         .add_startup_system(setup_camera)
         .add_startup_system(spawn_snake)
+        .add_system(snake_movement)
         .add_plugins(DefaultPlugins)
         .run();
 }
