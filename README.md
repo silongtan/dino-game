@@ -5,12 +5,13 @@
 
 ## Dino Game
 
-A Rust based dinosaur game
+A Rust based space invader game, using Bevy game engine.
 
 #### Current Status
 
 Learn Bevy
-
+added player
+added movement
 
 
 
