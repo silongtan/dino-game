@@ -3,15 +3,21 @@
 [![Clippy](https://github.com/noahgift/rdedupe/actions/workflows/lint.yml/badge.svg)](https://github.com/noahgift/rdedupe/actions/workflows/lint.yml)
 [![Rustfmt](https://github.com/noahgift/rdedupe/actions/workflows/rustfmt.yml/badge.svg)](https://github.com/noahgift/rdedupe/actions/workflows/rustfmt.yml)
 
-## Dino Game
+# Space Invader Game
 
 A Rust based space invader game, using Bevy game engine.
 
-#### Current Status
+## Installation
 
-Learn Bevy
-added player
-added movement
+You'll need to have Rust installed on your machine. You can download and install Rust from the official website: https://www.rust-lang.org/tools/install
+
+Once Rust is installed, clone this repository and navigate to the project directory in your terminal. Then, run the following command to build the timer:
+``` cargo build --release ```
+
+## Usage
+
+To use the game, run the following command from the project directory:
+``` cargo run --release ```
 
 
 
