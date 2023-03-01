@@ -14,7 +14,7 @@ impl Plugin for EnemyPlugin {
             // .add_system(enemy_spawn_system);
             .add_system_set(
                 SystemSet::new()
-                    .with_run_criteria(FixedTimestep::step(1.0))
+                    .with_run_criteria(FixedTimestep::step(2.0))
                     .with_system(enemy_spawn_system),
             )
             .add_system_set(
@@ -76,6 +76,7 @@ fn enemy_fire_system(
             texture: game_textures.enemy_laser.clone(),
             transform: Transform {
                 translation: Vec3::new(x, y-15.0, 0.0),
+                rotation: Quat::from_rotation_x(std::f32::consts::PI),
                 scale: Vec3::new(SPRITE_SCALE * 0.1, SPRITE_SCALE * 0.1, 1.0),
                 ..Default::default()
             },
