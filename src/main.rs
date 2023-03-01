@@ -1,16 +1,24 @@
 #![allow(unused)]
+use std::collections::HashSet;
 use bevy::prelude::*;
-use crate::components::Velocity;
-use crate::components::Movable;
+use bevy::sprite::collide_aabb::collide;
+use bevy::math::Vec3Swizzles;
+use crate::components::{Velocity, SpriteSize, Player, Movable, Laser, Enemy, FromPlayer, FromEnemy};
 
 mod components;
 mod player;
+mod enemy;
 
 // region: --- Asset Constants
 const PLAYER_SPRITE: &str = "player.png";
 const PLAYER_SIZE: (f32, f32) = (144., 75.);
 const PLAYER_LASER_SPRITE: &str = "player_laser.png";
-const PLAYER_LASER_SIZE: (f32, f32) = (16., 32.);
+const PLAYER_LASER_SIZE: (f32, f32) = (9., 54.);
+
+const ENEMY_SPRITE: &str = "enemy.png";
+const ENEMY_SIZE: (f32, f32) = (144., 75.);
+const ENEMY_LASER_SPRITE: &str = "enemy_laser.png";
+const ENEMY_LASER_SIZE: (f32, f32) = (17., 55.);
 
 const SPRITE_SCALE: f32 = 0.5;
 // endregion: --- Asset Constants
@@ -18,6 +26,8 @@ const SPRITE_SCALE: f32 = 0.5;
 // region: --- Game Constants
 const TIME_STEP: f32 = 1.0 / 60.0;
 const BASE_SPEED: f32 = 500.0;
+
+const ENEMY_MAX: u32 = 5;
 // endregion: --- Game Constants
 
 // region: --- Resource
@@ -28,8 +38,12 @@ pub struct WinSize {
 
 struct GameTextures {
     player: Handle<Image>,
-    player_laser: Handle<Image>, 
+    player_laser: Handle<Image>,
+    enemy: Handle<Image>,
+    enemy_laser: Handle<Image>, 
 }
+
+struct EnemyCount(u32);
 // endregion: --- Resource
 
 
@@ -44,8 +58,10 @@ fn main() {
         })
         .add_plugins(DefaultPlugins)
         .add_plugin(player::PlayerPlugin)
+        .add_plugin(enemy::EnemyPlugin)
         .add_startup_system(setup_system)
         .add_system(movable_system)
+        .add_system(player_laser_hit_enemy_system)
         .run();
 }
 
@@ -71,8 +87,11 @@ fn setup_system(
     let game_textures = GameTextures {
         player: asset_server.load(PLAYER_SPRITE),
         player_laser: asset_server.load(PLAYER_LASER_SPRITE),
+        enemy: asset_server.load(ENEMY_SPRITE),
+        enemy_laser: asset_server.load(ENEMY_LASER_SPRITE),
     };
     commands.insert_resource(game_textures);
+    commands.insert_resource(EnemyCount(0));
 }
 
 fn movable_system(
@@ -84,5 +103,63 @@ fn movable_system(
         let translation = &mut transform.translation;
         translation.x += velocity.x * TIME_STEP * BASE_SPEED;
         translation.y += velocity.y * TIME_STEP * BASE_SPEED;
+
+        if movable.auto_despawn {
+            // out of screen
+            const MARGIN: f32 = 200.0;
+            if translation.y > win_size.h / 2.0 + MARGIN 
+                || translation.y < -win_size.h / 2.0 - MARGIN
+                || translation.x > win_size.w / 2.0 + MARGIN
+                || translation.x < -win_size.w / 2.0 - MARGIN
+                {
+                    println!("->> despawn {entity:?}");
+                    commands.entity(entity).despawn();
+            }
+        }
+    }
+}
+
+fn player_laser_hit_enemy_system (
+    mut commands: Commands,
+    mut enemy_count: ResMut<EnemyCount>,
+    laser_query: Query<(Entity, &Transform, &SpriteSize), (With<Laser>, With<FromPlayer>)>,
+    enemy_query: Query<(Entity, &Transform, &SpriteSize), With<Enemy>>,
+) {
+
+    let mut despawned_entities: HashSet<Entity> = HashSet::new();
+
+    for (laser_entity, laser_tf, laser_size) in laser_query.iter() {
+        if despawned_entities.contains(&laser_entity) {
+            continue;
+        }
+        let laser_scale = Vec2::from(laser_tf.scale.xy());
+
+        // iterate through the enemies
+        for (enemy_entity, enemy_tf, enemy_size) in enemy_query.iter() {
+            if despawned_entities.contains(&enemy_entity)
+                || despawned_entities.contains(&laser_entity) {
+                continue;
+            }
+            let enemy_scale = Vec2::from(enemy_tf.scale.xy());
+
+            // check if the laser is colliding with the enemy
+            let collision = collide(
+                laser_tf.translation,
+                laser_size.0 * laser_scale,
+                enemy_tf.translation,
+                enemy_size.0 * enemy_scale,
+            );
+
+            // perform collision
+            if let Some(_) = collision {
+                // remove enemy
+                commands.entity(enemy_entity).despawn();
+                despawned_entities.insert(enemy_entity);
+                enemy_count.0 -= 1;
+                // remove laser
+                commands.entity(laser_entity).despawn();
+                despawned_entities.insert(laser_entity);
+            }
+        }
     }
 }

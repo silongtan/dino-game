@@ -1,8 +1,6 @@
 use bevy::prelude::*;
-use crate::{GameTextures, WinSize, SPRITE_SCALE, PLAYER_SIZE, TIME_STEP, BASE_SPEED};
-use crate::components::Velocity;
-use crate::components::Player;
-use crate::components::Movable;
+use crate::{GameTextures, WinSize, SPRITE_SCALE, PLAYER_SIZE, TIME_STEP, BASE_SPEED, PLAYER_LASER_SIZE, PLAYER_LASER_SPRITE};
+use crate::components::{Velocity, SpriteSize, Player, Movable, Laser, FromPlayer, FromEnemy};
 
 pub struct PlayerPlugin;
 
@@ -33,7 +31,8 @@ fn player_spawn_system(
         ..Default::default()
     })
     .insert(Player)
-    .insert(Movable {auto_spawn: false})
+    .insert(SpriteSize::from(PLAYER_SIZE))
+    .insert(Movable {auto_despawn: false})
     .insert(Velocity {x: 0.0, y: 0.0});
 }
 
@@ -62,18 +61,27 @@ fn player_fire_system(
     if let Ok(player_tf) = query.get_single() {
         if kb.just_pressed(KeyCode::Space) {
             let (x, y) = (player_tf.translation.x, player_tf.translation.y);
+            let x_offset = PLAYER_SIZE.0 / 2.0 * SPRITE_SCALE - 25.0;
 
-            commands.spawn_bundle(SpriteBundle {
-                texture: game_textures.player_laser.clone(),
-                transform: Transform {
-                    translation: Vec3::new(x, y, 0.0),
-                    scale: Vec3::new(SPRITE_SCALE * 0.1, SPRITE_SCALE * 0.1, 1.0),
+            let mut spawn_laser = |x_offset: f32| {
+                commands.spawn_bundle(SpriteBundle {
+                    texture: game_textures.player_laser.clone(),
+                    transform: Transform {
+                        translation: Vec3::new(x + x_offset, y + 5.0, 0.0),
+                        scale: Vec3::new(SPRITE_SCALE * 0.1, SPRITE_SCALE * 0.1, 1.0),
+                        ..Default::default()
+                    },
                     ..Default::default()
-                },
-                ..Default::default()
-            })
-            .insert(Movable {auto_spawn: true})
-            .insert(Velocity {x: 0.0, y: 1.0});
+                })
+                .insert(Laser)
+                .insert(FromPlayer)
+                .insert(SpriteSize::from(PLAYER_LASER_SIZE))
+                .insert(Movable {auto_despawn: true})
+                .insert(Velocity {x: 0.0, y: 1.0});
+            };
+
+            spawn_laser(x_offset);
+            spawn_laser(-x_offset);
         }
     }
 }
