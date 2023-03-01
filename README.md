@@ -1,37 +1,17 @@
-[![Tests](https://github.com/noahgift/rdedupe/actions/workflows/tests.yml/badge.svg)](https://github.com/noahgift/rdedupe/actions/workflows/tests.yml)
 [![Build binary release](https://github.com/noahgift/rdedupe/actions/workflows/release.yml/badge.svg)](https://github.com/noahgift/rdedupe/actions/workflows/release.yml)
-[![Clippy](https://github.com/noahgift/rdedupe/actions/workflows/lint.yml/badge.svg)](https://github.com/noahgift/rdedupe/actions/workflows/lint.yml)
 [![Rustfmt](https://github.com/noahgift/rdedupe/actions/workflows/rustfmt.yml/badge.svg)](https://github.com/noahgift/rdedupe/actions/workflows/rustfmt.yml)
 
 # Space Invader Game
 
 A Rust based space invader game, using Bevy game engine.
 
+## Description
+
+The game features a spaceship that can move left and right, and shoot bullets. The spaceship is controlled by the left and right arrow keys. The spacebar is used to shoot bullets. The game also features a number of enemies that move down the screen. The enemies are destroyed when they are hit by a bullet. The game ends when the spaceship is hit by an enemy. Player could repawn after a short time period.
+
 ## Installation
 
 You'll need to have Rust installed on your machine. You can download and install Rust from the official website: https://www.rust-lang.org/tools/install
-
-Once Rust is installed, clone this repository and navigate to the project directory in your terminal. Then, run the following command to build the timer:
-``` cargo build --release ```
-
-## Usage
-
-To use the game, run the following command from the project directory:
-``` cargo run --release ```
-
-
-
-#### Future Improvements
-
-Implementation
-Containerize
-Deploy
-
-### Building and Running
-
-* Build:  cd into rdedupe and run `make all`
-* Run:  `cargo run -- dedupe --path tests --pattern .txt`
-* Run tests:  `make test`
 
 ### OS X Install
 
@@ -52,3 +32,25 @@ rustflags = [
 ]
 ```
 * run `make all` in rdedupe directory
+
+
+Once Rust is installed, clone this repository and navigate to the project directory in your terminal. Then, run the following command to build the timer:
+``` cargo build --release ```
+
+## Usage
+
+To run the game, run the following command from the project directory:
+``` cargo run --release ```
+
+
+### Future Improvements
+
+Containerize
+Deploy
+
+## Game Screenshot
+
+## Reference
+[bevy](https://bevyengine.org)\
+[bevy guide](https://bevy-cheatbook.github.io)
+
